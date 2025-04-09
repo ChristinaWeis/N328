@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"></meta>
+  <title>Line Chart: OECD Pharmaceutical Market</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    .tooltip {
+      position: absolute;
+      text-align: left;
+      width: auto;
+      height: auto;
+      padding: 8px;
+      font-size: 14px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      pointer-events: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .line {
+      fill: none;
+      stroke: steelblue;
+      stroke-width: 2px;
+    }
+
+    circle {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Pharma Sales 2013 to 2023 (USD per person)</h2>
+  <h3>Data from the Organization for Economic Co-operation and Development (OECD)</h3>
+
+  <label for="country-select">Select Country:</label>
+  <select id="country-select"></select>
+
+  <label for="pharma-select" style="margin-left: 20px;">Select Pharmaceutical Type:</label>
+  <select id="pharma-select"></select>
+
+  <svg width="900" height="500"></svg>
+  <div class="tooltip" style="opacity:0;"></div>
+
+  <script>
+    const svg = d3.select("svg"),
+          margin = {top: 40, right: 20, bottom: 60, left: 60},
+          width = +svg.attr("width") - margin.left - margin.right,
+          height = +svg.attr("height") - margin.top - margin.bottom;
+
+    const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+    const x = d3.scaleBand().padding(0.2).range([0, width]);
+    const y = d3.scaleLinear().range([height, 0]);
+    const tooltip = d3.select(".tooltip");
+
+    d3.csv("OECD_PHARMA_2013_2023.csv").then(data => {
+      data.forEach(d => {
+        d.OBS_VALUE = +d.OBS_VALUE;
+        d.TIME_PERIOD = +d.TIME_PERIOD;
+      });
+
+      const countries = Array.from(new Set(data.map(d => d["Reference area"]))).sort();
+      const pharmas = Array.from(new Set(data.map(d => d["Pharmaceutical"]))).sort();
+      pharmas.unshift("All (Total)");
+
+      const countryDropdown = d3.select("#country-select");
+      const pharmaDropdown = d3.select("#pharma-select");
+
+      countryDropdown.selectAll("option")
+        .data(countries)
+        .enter()
+        .append("option")
+        .text(d => d);
+
+      pharmaDropdown.selectAll("option")
+        .data(pharmas)
+        .enter()
+        .append("option")
+        .text(d => d);
+
+      updateChart(countries[0], pharmas[0]);
+
+      countryDropdown.on("change", () => {
+        updateChart(countryDropdown.node().value, pharmaDropdown.node().value);
+      });
+
+      pharmaDropdown.on("change", () => {
+        updateChart(countryDropdown.node().value, pharmaDropdown.node().value);
+      });
+
+      function updateChart(country, pharmaType) {
+        let filteredData = data.filter(d => d["Reference area"] === country);
+
+        let groupedData;
+        if (pharmaType !== "All (Total)") {
+          filteredData = filteredData.filter(d => d["Pharmaceutical"] === pharmaType);
+          groupedData = d3.rollups(
+            filteredData,
+            v => d3.sum(v, d => d.OBS_VALUE),
+            d => d.TIME_PERIOD
+          );
+        } else {
+          groupedData = d3.rollups(
+            filteredData,
+            v => d3.sum(v, d => d.OBS_VALUE),
+            d => d.TIME_PERIOD
+          );
+        }
+
+        const countryData = groupedData
+          .map(([year, value]) => ({ year: +year, value }))
+          .sort((a, b) => a.year - b.year);
+
+        x.domain(countryData.map(d => d.year));
+        y.domain([0, d3.max(countryData, d => d.value)]);
+
+        g.selectAll(".x-axis").remove();
+        g.selectAll(".y-axis").remove();
+        g.selectAll(".line").remove();
+        g.selectAll(".circle").remove();
+
+        g.append("g")
+          .attr("class", "x-axis")
+          .attr("transform", `translate(0,${height})`)
+          .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+        g.append("g")
+          .attr("class", "y-axis")
+          .call(d3.axisLeft(y));
+
+        const line = d3.line()
+          .x(d => x(d.year) + x.bandwidth() / 2)
+          .y(d => y(d.value))
+          .curve(d3.curveMonotoneX);
+
+        const path = g.append("path")
+          .datum(countryData)
+          .attr("class", "line")
+          .attr("d", line);
+
+        const totalLength = path.node().getTotalLength();
+        path
+          .attr("stroke-dasharray", totalLength + " " + totalLength)
+          .attr("stroke-dashoffset", totalLength)
+          .transition()
+          .duration(1000)
+          .ease(d3.easeLinear)
+          .attr("stroke-dashoffset", 0);
+
+        g.selectAll(".circle")
+          .data(countryData)
+          .enter()
+          .append("circle")
+          .attr("class", "circle")
+          .attr("cx", d => x(d.year) + x.bandwidth() / 2)
+          .attr("cy", d => y(d.value))
+          .attr("r", 5)
+          .attr("fill", "steelblue")
+          .on("mouseover", (event, d) => {
+            d3.select(event.currentTarget).attr("fill", "orange");
+            tooltip.transition().duration(200).style("opacity", 1);
+            tooltip.html(`Year: ${d.year}<br>Value (USD): ${d.value.toFixed(2)}`)
+              .style("left", (event.pageX + 10) + "px")
+              .style("top", (event.pageY - 28) + "px");
+          })
+          .on("mouseout", (event, d) => {
+            d3.select(event.currentTarget).attr("fill", "steelblue");
+            tooltip.transition().duration(200).style("opacity", 0);
+          });
+      }
+    });
+  </script>
+</body>
+</html>
