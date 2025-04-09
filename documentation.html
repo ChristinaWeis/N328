@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OECD Pharma Visualization – Design Documentation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+
+    h1, h2, h3 {
+      color: #333;
+    }
+
+    img.placeholder {
+      display: block;
+      margin: 20px auto;
+      width: 100%;
+      max-width: 600px;
+      border: 1px dashed #ccc;
+      padding: 10px;
+      background: #f9f9f9;
+      text-align: center;
+      font-style: italic;
+      color: #777;
+    }
+
+    code {
+      background-color: #f4f4f4;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+
+    .section {
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>OECD Pharma Visualization – Design Documentation</h1>
+
+  <div class="section">
+    <h2>Project Overview</h2>
+    <p>
+      This project presents an interactive D3.js line chart to visualize pharmaceutical expenditure data from 2013 to 2023 across OECD countries.
+      Users can explore trends in per-capita pharmaceutical sales by country and drug type using dropdown menus and dynamic transitions.
+
+      <div class="section">
+        <h2>Data Source</h2>
+        <p>
+          This dataset was obtained from the OECD Health Data Explorer:
+          <a href="https://data-explorer.oecd.org/vis?lc=en&fs[0]=Topic%2C1%7CHealth%23HEA%23%7CPharmaceutical%20market%23HEA_PHM%23&pg=0&fc=Topic&bp=true&snb=4&vw=tb&df[ds]=dsDisseminateFinalDMZ&df[id]=HEALTH_PHMC%40DF_KEY_INDIC&df[ag]=OECD.ELS.HD&df[vs]=1.0&dq=..USD_PPP_PS%2BDDD_10P3HB..R03%2BN05C%2BN05B%2BN02%2BM01A%2BJ01%2BH%2BG03%2BC10%2BC09%2BC08%2BC07%2BC03%2BC02%2BC01B%2BC01A%2BA10%2BB%2BA02B%2BA02A%2BN06A&pd=2013%2C2023&to[TIME_PERIOD]=false" target="_blank">
+            OECD Pharmaceutical Market Dataset (2013–2023)
+          </a>
+        </p>
+      </div>      
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Design Process</h2>
+    <p>
+      Two initial hand-drawn sketches helped determine layout, interaction methods, and chart type before coding.
+    </p>
+
+    <img src="sketch1-placeholder.jpg" alt="Design Sketch 1" class="placeholder" />
+    <p class="img-caption"><em>Sketch 1: Initial bar chart with dropdown layout and tooltip concept.</em></p>
+
+    <img src="sketch2-placeholder.jpg" alt="Design Sketch 2" class="placeholder" />
+    <p class="img-caption"><em>Sketch 2: Revised sketch with a line chart to show trends over time.</em></p>
+  </div>
+
+  <div class="section">
+    <h2>Why a Line Chart?</h2>
+    <ul>
+      <li>Line charts show continuous data and trends more clearly than bars.</li>
+      <li>They highlight year-over-year changes without overwhelming the user.</li>
+      <li>The smooth transitions and clean design reduce visual noise and improve readability.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Visual Encoding Choices</h2>
+    <table>
+      <tr><th>Variable</th><th>Encoding</th><th>Reason</th></tr>
+      <tr><td>Year</td><td>X-axis</td><td>Chronological left-to-right makes trends easy to follow.</td></tr>
+      <tr><td>Pharma Value</td><td>Y-axis</td><td>Height encodes magnitude of per-capita sales.</td></tr>
+      <tr><td>Country</td><td>Dropdown Filter</td><td>Allows focused analysis per country.</td></tr>
+      <tr><td>Pharmaceutical Type</td><td>Dropdown + Color</td><td>Users can isolate or aggregate types.</td></tr>
+      <tr><td>Value Detail</td><td>Tooltip</td><td>Reduces clutter, reveals exact info on hover.</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>Layout Decisions</h2>
+    <p>
+      Dropdowns are positioned above the chart for easy access. The title provides context, and a tooltip follows the cursor for instant feedback.
+      Axes and lines are clearly labeled and animated to draw attention to trends.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Using the Visualization to Discover Insights</h2>
+    <p>
+      The two screenshots below demonstrate specific insights discovered using the visualization:
+    </p>
+
+    <img src="screenshot1-placeholder.jpg" alt="Screenshot 1" class="placeholder" />
+    <p class="img-caption"><em>Screenshot 1: United Kingdom total pharmaceutical sales showing a consistent upward trend from 2013 to 2023.</em></p>
+
+    <img src="screenshot2-placeholder.jpg" alt="Screenshot 2" class="placeholder" />
+    <p class="img-caption"><em>Screenshot 2: COVID-19 spike in 2020 in Italy for Hypnotics and sedatives.</em></p>
+  </div>
